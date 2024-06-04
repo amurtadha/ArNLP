@@ -128,46 +128,22 @@ def main(max_s=None,lr = None):
     # Hyper Parameters
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='unlabeled', type=str, help='unlabeled')
-    #parser.add_argument('--dataset', default='Corpus-6', type=str, help='Corpus-6, Corpus-26')
     parser.add_argument('--optimizer', default='adam', type=str)
     parser.add_argument('--initializer', default='xavier_uniform_', type=str)
-    parser.add_argument('--learning_rate', default=2e-5, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
-    # parser.add_argument('--learning_rate', default=1e-3, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
+    parser.add_argument('--learning_rate', default=2e-5, type=float, help='')
     parser.add_argument('--adam_epsilon', default=2e-8, type=float, help='')
-    parser.add_argument('--weight_decay', default=0, type=float, help='try 5e-5, 2e-5 for BERT, 1e-3 for others')
-    parser.add_argument('--dropout', default=0.5, type=float)
-    parser.add_argument('--l2reg', default=0.01, type=float)
-    parser.add_argument('--reg', type=float, default=0.00005, help='regularization constant for weight penalty')
-    parser.add_argument('--num_epoch', default=6, type=int, help='try larger number for non-BERT models')
-    parser.add_argument('--batch_size', default=256, type=int, help='try 16, 32, 64 for BERT models')
-    parser.add_argument('--batch_size_val', default=256, type=int, help='try 16, 32, 64 for BERT models')
-    parser.add_argument('--log_step', default=20000, type=int)
-    parser.add_argument('--embed_dim', default=300, type=int)
-    parser.add_argument('--hidden_dim', default=300, type=int)
+    parser.add_argument('--weight_decay', default=0, type=float, help='')
+    parser.add_argument('--num_epoch', default=6, type=int, help='')
+    parser.add_argument('--batch_size', default=256, type=int, help='')
+    parser.add_argument('--batch_size_val', default=256, type=int, help='')
     parser.add_argument('--max_grad_norm', default=10, type=int)
     parser.add_argument('--negative_sampling', default=20, type=int)
     parser.add_argument('--warmup_proportion', default=0.01, type=float)
     parser.add_argument('--n_clusters', default=15, type=int)
-    #parser.add_argument('--pretrained_bert_name', default='D:/models/camelbert-mix', type=str)
-    #parser.add_argument('--pretrained_bert_name', default="D:/models/camelbert-msa", type=str)
-    #parser.add_argument('--pretrained_bert_name', default='D:/models/camelbert-da', type=str)
-    #parser.add_argument('--pretrained_bert_name', default='E:/ADI_6_26/LaBSE', type=str)
-    #parser.add_argument('--pretrained_bert_name', default='D:/models/AraBERTv0.2b', type=str)
-    #parser.add_argument('--pretrained_bert_name', default='D:/models/AraBERTv0.1', type=str)
-    #parser.add_argument('--pretrained_bert_name', default='D:/models/camelbert-ca', type=str)
-    # parser.add_argument('--pretrained_bert_name', default='UBC-NLP/ARBERT', type=str)
-   # parser.add_argument('--pretrained_bert_name', default='D:/models/Arabic_BERT_Larg', type=str)
-    #parser.add_argument('--pretrained_bert_name', default='bashar-talafha/multi-dialect-bert-base-arabic', type=str)
-    #parser.add_argument('--pretrained_bert_name', default='D:/models/mutli_dialect', type=str)
-    # parser.add_argument('--pretrained_bert_name', default='/workspace/plm/models--sentence-transformers--distiluse-base-multilingual-cased-v1/snapshots/ae9f5e096840ab325a30464d284f293fbea761a8/', type=str)
     parser.add_argument('--pretrained_bert_name', default='/workspace/plm/mabert', type=str)
     parser.add_argument('--max_seq_len', default=128, type=int) #
-    parser.add_argument('--hops', default=3, type=int)
     parser.add_argument('--device', default='cuda' , type=str, help='e.g. cuda:0')
     parser.add_argument('--seed', default=42, type=int, help='set seed for reproducibility')
-    parser.add_argument('--valset_ratio', default=0.1, type=float, help='set ratio between 0 and 1 for validation support')
-    parser.add_argument('--local_context_focus', default='cdm', type=str, help='local context focus mode, cdw or cdm')
-    parser.add_argument('--SRD', default=3, type=int, help='semantic-relative-distance, see the paper of LCF-BERT model')
     opt = parser.parse_args()
 
 
@@ -185,23 +161,12 @@ def main(max_s=None,lr = None):
         opt.max_seq_len = max_s
 
 
-
-    plm = {
-            'ours': 'OurArNLP/',
-            # 'camel':'CAMeL-Lab/bert-base-arabic-camelbert-msa',
-            'camel': 'bert-base-arabic-camelbert-mix',
-            'labse': 'sentence-transformers/LaBSE',
-            'arabert': 'aubmindlab/bert-base-arabertv2',
-            'mdbert': 'bashar-talafha/multi-dialect-bert-base-arabic',
-            'mbert': 'models--google-bert--bert-base-multilingual-cased',
-            'peotbert': 'models--faisalq--bert-base-arapoembert',
-            'arbert': 'arbert',
-            'mabert': 'mabert',
-            'sbert': 'sbertv2/snapshots/03a0532331151aeb3e1d2e602ffad62bb212a38d/',
-
+     plm = {
+            'sbert': 'nrazavi/sbert-v2',
         }
+  
     opt.plm= opt.pretrained_bert_name
-    opt.pretrained_bert_name= '/workspace/plm/{}'.format(plm[opt.pretrained_bert_name])
+    opt.pretrained_bert_name= plm[opt.plm]
 
 
     dataset_files = {
@@ -210,21 +175,7 @@ def main(max_s=None,lr = None):
     }
     input_colses =  ['input_ids', 'segments_ids', 'input_mask', 'text']
 
-    initializers = {
-        'xavier_uniform_': torch.nn.init.xavier_uniform_,
-        'xavier_normal_': torch.nn.init.xavier_normal,
-        'orthogonal_': torch.nn.init.orthogonal_,
-    }
-    optimizers = {
-        'adadelta': torch.optim.Adadelta,  # default lr=1.0
-        'adagrad': torch.optim.Adagrad,  # default lr=0.01
-        'adam': torch.optim.AdamW,  # default lr=0.001
-        # 'adam': torch.optim.Adam,  # default lr=0.001
-        'adamax': torch.optim.Adamax,  # default lr=0.002
-        'asgd': torch.optim.ASGD,  # default lr=0.01
-        'rmsprop': torch.optim.RMSprop,  # default lr=0.01
-        'sgd': torch.optim.SGD,
-    }
+   
     opt.inputs_cols = input_colses
     opt.data_file=dataset_files
     opt.initializer = initializers[opt.initializer]
