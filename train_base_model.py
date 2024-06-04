@@ -27,9 +27,6 @@ class Instructor:
     def __init__(self, opt):
         self.opt = opt
         print(opt.pretrained_bert_name)
-
-        #ache = 'cache/topic_{}.pk'.format(opt.dataset)
-        # cache = 'cache/topic_{}_{}.pk'.format(self.opt.dataset, self.opt.pretrained_bert_name.split('/')[-1] if len( self.opt.pretrained_bert_name.split('/')) else  self.opt.pretrained_bert_name)
         cache = 'cache/topic_{}_{}.pk'.format(self.opt.dataset, self.opt.plm)
         print(cache)
         if os.path.exists(cache):
@@ -51,27 +48,13 @@ class Instructor:
             self.model = DialTopic_SBERT(opt)
         else:
             self.model = DialTopic(opt)
-        # self.model = nn.DataParallel(self.model)
         self.model.to(opt.device)
         print(opt.device)
 
         if opt.device.type == 'cuda':
             logger.info('cuda memory allocated: {}'.format(torch.cuda.memory_allocated(device=opt.device.index)))
-        # self._print_args()
 
-    def _print_args(self):
-        n_trainable_params, n_nontrainable_params = 0, 0
-        for p in self.model.parameters():
-            n_params = torch.prod(torch.tensor(p.shape))
-            if p.requires_grad:
-                n_trainable_params += n_params
-            else:
-                n_nontrainable_params += n_params
-        logger.info('n_trainable_params: {0}, n_nontrainable_params: {1}'.format(n_trainable_params, n_nontrainable_params))
-        logger.info('> training arguments:')
-        for arg in vars(self.opt):
-            logger.info('>>> {0}: {1}'.format(arg, getattr(self.opt, arg)))
-
+   
 
     def warmup_linear(self, x, warmup=0.002):
         if x < warmup:
@@ -89,7 +72,6 @@ class Instructor:
             logger.info('>' * 100)
             logger.info('epoch: {}'.format(epoch))
 
-            # switch model to training mode
             loss_total=0
             n_total = 0
             self.model.train()
@@ -97,27 +79,18 @@ class Instructor:
 
             for i_batch, sample_batched in enumerate(tqdm(train_data_loader)):
                 global_step += 1
-                # clear gradient accumulators
                 optimizer.zero_grad()
                 if 'sbert' in self.opt.pretrained_bert_name:
-                    # print(sample_batched)
                     inputs= sample_batched['text']
                     n_total += len(inputs)
 
                 else:
                     inputs = [sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
                     n_total += inputs[0].shape[0]
-                # print(len(inputs))
-                # inputs = [b.to(self.opt.device) for b in sample_batched]
+             
                 loss= self.model(inputs)
                 loss_total+=loss.detach().item()
                 loss.backward()
-                # print(inputs[0].shape)
-
-                # lr_this_step = self.opt.learning_rate * self.warmup_linear(global_step / t_total,self.opt.warmup_proportion)
-                # for param_group in optimizer.param_groups:
-                #     param_group['lr'] = lr_this_step
-                # torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.opt.max_grad_norm)
                 optimizer.step()
 
                 if global_step % self.opt.log_step == 0:
@@ -135,91 +108,16 @@ class Instructor:
 
             self.model.load_state_dict(path)
 
-            # path_=  'state_dict/topic/{}_{}_topic.bm'.format(self.opt.dataset, self.opt.pretrained_bert_name.split('/')[-1].split('\\')[-1])
             path_=  'state_dict/topic/{}_{}_topic_.bm'.format(self.opt.dataset, self.opt.plm)
             torch.save(self.model.state_dict(), path_)
 
         return path
-
-    def _evaluate_acc_f1(self, data_loader):
-        n_correct, n_total = 0, 0
-        t_targets_all, t_outputs_all = None, None
-        # switch model to evaluation mode
-        self.model.eval()
-        with torch.no_grad():
-            for t_batch, t_sample_batched in enumerate(tqdm(data_loader)):
-                # t_inputs = [b.to(self.opt.device) for b in t_sample_batched]
-                t_inputs = [t_sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
-                t_targets = t_inputs[-1]
-                # t_targets = t_sample_batched['label'].to(self.opt.device)
-                t_outputs = self.model(t_inputs)
-
-                n_correct += (torch.argmax(t_outputs, -1) == t_targets).sum().item()
-                n_total += len(t_outputs)
-
-                if t_targets_all is None:
-                    t_targets_all = t_targets
-                    t_outputs_all = t_outputs
-                else:
-                    t_targets_all = torch.cat((t_targets_all, t_targets), dim=0)
-                    t_outputs_all = torch.cat((t_outputs_all, t_outputs), dim=0)
-
-        acc = n_correct / n_total
-        f1 = metrics.f1_score(t_targets_all.cpu(), torch.argmax(t_outputs_all, -1).cpu(), average='weighted')
-        return acc, f1
-    def make_weights_for_balanced_classes(self, labels, nclasses, fixed=False):
-        if fixed:
-            weight = [0] * len(labels)
-            if nclasses == 3:
-                for idx, val in enumerate(labels):
-                    if val == 0:
-                        weight[idx] = 0.2
-                    elif val == 1:
-                        weight[idx] = 0.4
-                    elif val == 2:
-                        weight[idx] = 0.4
-                return weight
-            else:
-                for idx, val in enumerate(labels):
-                    if val == 0:
-                        weight[idx] = 0.2
-                    else:
-                        weight[idx] = 0.4
-                return weight
-        else:
-            count = [0] * nclasses
-            for item in labels:
-                # print(count,item)
-                count[item] += 1
-            weight_per_class = [0.] * nclasses
-            N = float(sum(count))
-            for i in range(nclasses):
-                weight_per_class[i] = N / float(count[i])
-            weight = [0] * len(labels)
-            for idx, val in enumerate(labels):
-                weight[idx] = weight_per_class[val]
-            return weight
-
-    def get_bert_optimizer(self):
-        # Prepare optimizer and schedule (linear warmup and decay)
-        no_decay = ['bias', 'LayerNorm.weight']
-        optimizer_grouped_parameters = [
-            {'params': [p for n, p in self.model.named_parameters() if not any(nd in n for nd in no_decay)],
-             'weight_decay': self.opt.weight_decay},
-            {'params': [p for n, p in self.model.named_parameters() if any(
-                nd in n for nd in no_decay)], 'weight_decay': 0.0}
-        ]
-        optimizer = AdamW(optimizer_grouped_parameters,
-                          lr=self.opt.learning_rate, eps=self.opt.adam_epsilon)
-        # scheduler = WarmupLinearSchedule(
-        #     optimizer, warmup_steps=args.warmup_steps, t_total=t_total)
-        return optimizer
+   
     def run(self):
         _params = filter(lambda p: p.requires_grad, self.model.parameters())
         optimizer = self.opt.optimizer(self.model.parameters(), lr=self.opt.learning_rate, weight_decay=self.opt.l2reg)
 
 
-        # train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.opt.batch_size, shuffle=True, num_workers=4)
         train_data_loader = DataLoader(dataset=self.trainset, batch_size=self.opt.batch_size, shuffle=True)
 
         t_total= int(len(train_data_loader) * self.opt.num_epoch)
