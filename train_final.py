@@ -230,23 +230,20 @@ if __name__ == '__main__':
     log_file = f'{opt.dataset}-{opt.datetime}.log'
     logger.addHandler(logging.FileHandler(log_file))
     plm = {
-            'ours': 'OurArNLP/',
-            'camel': 'bert-base-arabic-camelbert-mix',
-            'labse': 'labse/models--sentence-transformers--LaBSE',
-            'arabert': 'arabert/models--aubmindlab--bert-base-arabertv2/',
+            'camel': 'CAMeL-Lab/bert-base-arabic-camelbert-mix',
+            'labse': 'sentence-transformers--LaBSE',
+            'arabert': 'aubmindlab/bert-base-arabertv2',
             'mdbert': 'bashar-talafha/multi-dialect-bert-base-arabic',
-            'mbert': 'models--google-bert--bert-base-multilingual-cased',
-            'peotbert': 'models--faisalq--bert-base-arapoembert',
-            'arbert': 'arbert',
-            'mabert': 'mabert',
-            'sbert': 'sbertv2/snapshots/03a0532331151aeb3e1d2e602ffad62bb212a38d/',
-
+            'mbert': 'google-bert/bert-base-multilingual-cased',
+            'arbert': 'UBC-NLP/ARBERT',
+            'mabert': 'UBC-NLP/MARBERT',
+            'sbert': 'nrazavi/sbert-v2',
         }
     opt.plm_base= opt.baseline_plm
     opt.plm= opt.pretrained_bert_name
-    opt.pretrained_bert_name= '/workspace/plm/{}'.format(plm[opt.pretrained_bert_name])
-    opt.topic_model = '/workspace/ArNLP/TDID/state_dict/topic/unlabeled_{}_topic_.bm'.format(opt.baseline_plm)
-    opt.baseline_plm= '/workspace/plm/{}'.format(plm[opt.baseline_plm])
+    opt.pretrained_bert_name= plm[opt.pretrained_bert_name]
+    opt.topic_model = 'state_dict/topic/unlabeled_{}_topic_.bm'.format(opt.baseline_plm)
+    opt.baseline_plm= plm[opt.baseline_plm]
 
 
     opt.pretrained_bert_name_path ='/workspace/plm/{}'.format(opt.pretrained_bert_name)
