@@ -21,7 +21,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 from transformers import  AutoTokenizer, AutoModel
-from MyModel import DialTopic,DialTopic_SBERT
+from MyModel import MyIdenticator
 import pickle as pk
 class Instructor:
     def __init__(self, opt):
@@ -44,10 +44,8 @@ class Instructor:
             pk.dump(d, open(cache, 'wb'))
 
         print(len( self.trainset), self.opt.plm)
-        if 'sbert' in self.opt.plm:
-            self.model = DialTopic_SBERT(opt)
-        else:
-            self.model = DialTopic(opt)
+        self.model = MyIdenticator(opt)
+        
         self.model.to(opt.device)
         print(opt.device)
 
@@ -80,13 +78,10 @@ class Instructor:
             for i_batch, sample_batched in enumerate(tqdm(train_data_loader)):
                 global_step += 1
                 optimizer.zero_grad()
-                if 'sbert' in self.opt.pretrained_bert_name:
-                    inputs= sample_batched['text']
-                    n_total += len(inputs)
+                inputs= sample_batched['text']
+                n_total += len(inputs)
 
-                else:
-                    inputs = [sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
-                    n_total += inputs[0].shape[0]
+                
              
                 loss= self.model(inputs)
                 loss_total+=loss.detach().item()
