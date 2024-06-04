@@ -242,7 +242,7 @@ if __name__ == '__main__':
     opt.plm_base= opt.baseline_plm
     opt.plm= opt.pretrained_bert_name
     opt.pretrained_bert_name= plm[opt.pretrained_bert_name]
-    opt.topic_model = 'state_dict/topic/unlabeled_{}_topic_.bm'.format(opt.baseline_plm)
+    opt.topic_model = 'state_dict/topic/unlabeled_{}_topic.bm'.format(opt.baseline_plm)
     opt.baseline_plm= plm[opt.baseline_plm]
 
 
