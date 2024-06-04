@@ -69,7 +69,7 @@ class Pure_plm(nn.Module):
         super(Pure_plm, self).__init__()
         config = AutoConfig.from_pretrained(args.pretrained_bert_name)
 
-        self.topic=DialTopic_SBERT(args, training=False)
+        self.topic=MyIdenticator(args, training=False)
         self.topic.load_state_dict(torch.load(args.topic_model))
       
         self.encoder = AutoModel.from_pretrained(
