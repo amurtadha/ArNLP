@@ -24,7 +24,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
 from transformers import  AutoTokenizer
-from MyModel import pure_plm_sbert,pure_plm
+from MyModel import Pure_plm
 
 import pickle as pk
 
@@ -59,10 +59,7 @@ class Instructor:
 
 
         print(self.opt.plm_base)
-        if 'sbert' in self.opt.plm_base:
-            self.model = pure_plm_sbert(opt)
-        else:
-            self.model = pure_plm(opt)
+        self.model = Pure_plm(opt)
         self.model.to(opt.device)
         if opt.device.type == 'cuda':
             logger.info('cuda memory allocated: {}'.format(torch.cuda.memory_allocated(device=opt.device.index)))
@@ -95,8 +92,7 @@ class Instructor:
                 optimizer.zero_grad()
                 inputs = [sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
                 targets = inputs[-1]
-                if 'sbert' in self.opt.topic_model:
-                    inputs.append(sample_batched['text'])
+                inputs.append(sample_batched['text'])
 
                 outputs = self.model(inputs)
                 loss = criterion(outputs, targets)
@@ -129,8 +125,7 @@ class Instructor:
             for t_batch, t_sample_batched in enumerate(tqdm(data_loader)):
                 t_inputs = [t_sample_batched[col].to(self.opt.device) for col in self.opt.inputs_cols]
                 t_targets = t_inputs[-1]
-                if 'sbert' in self.opt.topic_model:
-                    t_inputs.append(t_sample_batched['text'])
+                t_inputs.append(t_sample_batched['text'])
                 t_outputs = self.model(t_inputs)
 
                 n_correct += (torch.argmax(t_outputs, -1) == t_targets).sum().detach().item()
