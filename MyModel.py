@@ -6,9 +6,9 @@ import math
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 from sentence_transformers import SentenceTransformer
 
-class DialTopic_SBERT(nn.Module):
+class MyIdenticator(nn.Module):
     def __init__(self, opt, training=True):
-        super(DialTopic_SBERT, self).__init__()
+        super(MyIdenticator, self).__init__()
         config = AutoConfig.from_pretrained(opt.pretrained_bert_name)
         self.config=config
         dim =512
@@ -64,9 +64,9 @@ class DialTopic_SBERT(nn.Module):
         return loss
 
 
-class pure_plm_sbert(nn.Module):
+class Pure_plm(nn.Module):
     def __init__(self, args, hidden_size=256):
-        super(pure_plm_sbert, self).__init__()
+        super(Pure_plm, self).__init__()
         config = AutoConfig.from_pretrained(args.pretrained_bert_name)
 
         self.topic=DialTopic_SBERT(args, training=False)
