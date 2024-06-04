@@ -26,13 +26,10 @@ import pickle as pk
 class Instructor:
     def __init__(self, opt):
         self.opt = opt
-        print(opt.pretrained_bert_name)
         cache = 'cache/topic_{}_{}.pk'.format(self.opt.dataset, self.opt.plm)
-        print(cache)
         if os.path.exists(cache):
             d = pk.load(open(cache, 'rb'))
             self.trainset = d['train']
-
         else:
             tokenizer = AutoTokenizer.from_pretrained(opt.pretrained_bert_name)
             self.trainset = Process_topic(opt.data_file['train'], tokenizer, opt.max_seq_len, opt.dataset)
@@ -43,11 +40,10 @@ class Instructor:
             d = {'train': self.trainset}
             pk.dump(d, open(cache, 'wb'))
 
-        print(len( self.trainset), self.opt.plm)
+        logging.info(len( self.trainset), self.opt.plm)
         self.model = MyIdenticator(opt)
         
         self.model.to(opt.device)
-        print(opt.device)
 
         if opt.device.type == 'cuda':
             logger.info('cuda memory allocated: {}'.format(torch.cuda.memory_allocated(device=opt.device.index)))
@@ -124,7 +120,7 @@ class Instructor:
 
 
 
-def main(max_s=None,lr = None):
+def main():
     # Hyper Parameters
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='unlabeled', type=str, help='unlabeled')
@@ -155,10 +151,6 @@ def main(max_s=None,lr = None):
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-    if lr is not None :
-        opt.dropout = lr
-    if max_s is not None :
-        opt.max_seq_len = max_s
 
 
      plm = {
@@ -166,12 +158,11 @@ def main(max_s=None,lr = None):
         }
   
     opt.plm= opt.pretrained_bert_name
-    opt.pretrained_bert_name= plm[opt.plm]
+    opt.pretrained_bert_name= plm[opt.pretrained_bert_name]
 
 
     dataset_files = {
         'train': '/workspace/NLP_ADI/datasets/large_corpus/unlabeled_corpus.txt',
-
     }
     input_colses =  ['input_ids', 'segments_ids', 'input_mask', 'text']
 
@@ -182,7 +173,6 @@ def main(max_s=None,lr = None):
     opt.optimizer = optimizers[opt.optimizer]
     opt.device = torch.device(opt.device if torch.cuda.is_available() else 'cpu') \
         if opt.device is None else torch.device(opt.device)
-    # opt.device='cuda:5'
     log_file = '{}-{}.log'.format(opt.dataset, strftime("%y%m%d-%H%M", localtime()))
     logger.addHandler(logging.FileHandler(log_file))
 
