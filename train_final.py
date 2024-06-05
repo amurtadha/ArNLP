@@ -238,6 +238,7 @@ if __name__ == '__main__':
             'arbert': 'UBC-NLP/ARBERT',
             'mabert': 'UBC-NLP/MARBERT',
             'sbert': 'sentence-transformers/distiluse-base-multilingual-cased-v2',
+            'mpnet': 'sentence-transformers--paraphrase-multilingual-mpnet-base-v2',
         }
     opt.plm_base= opt.baseline_plm
     opt.plm= opt.pretrained_bert_name
