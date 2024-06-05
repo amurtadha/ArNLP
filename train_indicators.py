@@ -41,7 +41,7 @@ class Instructor:
             d = {'train': self.trainset}
             pk.dump(d, open(cache, 'wb'))
 
-        logging.info(len(self.trainset), self.opt.plm)
+        logging.info('training: {}, PLM: {}'.format(len(self.trainset), self.opt.plm))
         self.model = MyIdenticator(opt)
 
         self.model.to(opt.device)
@@ -118,8 +118,6 @@ def main():
     # Hyper Parameters
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', default='unlabeled', type=str, help='unlabeled')
-    parser.add_argument('--optimizer', default='adam', type=str)
-    parser.add_argument('--initializer', default='xavier_uniform_', type=str)
     parser.add_argument('--learning_rate', default=2e-5, type=float, help='')
     parser.add_argument('--adam_epsilon', default=2e-8, type=float, help='')
     parser.add_argument('--weight_decay', default=0, type=float, help='')
@@ -135,6 +133,7 @@ def main():
     parser.add_argument('--device', default='cuda', type=str, help='e.g. cuda:0')
     parser.add_argument('--seed', default=42, type=int, help='set seed for reproducibility')
     parser.add_argument('--l2reg', default=0.01, type=float)
+    parser.add_argument('--log_step', default=2000, type=int)
 
     opt = parser.parse_args()
 
@@ -152,12 +151,13 @@ def main():
     }
 
     opt.plm = opt.pretrained_bert_name
-    opt.pretrained_bert_name = +plm[opt.pretrained_bert_name]
+    opt.pretrained_bert_name = plm[opt.pretrained_bert_name]
 
     dataset_files = {
         'train': '/workspace/NLP_ADI/datasets/large_corpus/unlabeled_corpus.txt',
     }
     input_colses = ['input_ids', 'segments_ids', 'input_mask', 'text']
+    opt.optimizer = torch.optim.Adam
 
     opt.inputs_cols = input_colses
     opt.data_file = dataset_files
