@@ -9,13 +9,13 @@ from sentence_transformers import SentenceTransformer
 class MyIdenticator(nn.Module):
     def __init__(self, opt, training=True):
         super(MyIdenticator, self).__init__()
-        config = AutoConfig.from_pretrained(opt.pretrained_bert_name)
+        config = AutoConfig.from_pretrained(opt.pretrained_bert_name,  cache_dir='/workspace/plm/')
         self.config=config
         dim =512
         if training:
-            self.encoder = SentenceTransformer(opt.pretrained_bert_name)
+            self.encoder = SentenceTransformer(opt.pretrained_bert_name,  cache_dir='/workspace/plm/')
         else:
-            self.encoder = SentenceTransformer(opt.baseline_plm)
+            self.encoder = SentenceTransformer(opt.baseline_plm,  cache_dir='/workspace/plm/')
         self.opt = opt
         self.n_clusters = self.opt.n_clusters
         self.training = training
@@ -67,7 +67,7 @@ class MyIdenticator(nn.Module):
 class Pure_plm(nn.Module):
     def __init__(self, args, hidden_size=256):
         super(Pure_plm, self).__init__()
-        config = AutoConfig.from_pretrained(args.pretrained_bert_name)
+        config = AutoConfig.from_pretrained(args.pretrained_bert_name,  cache_dir='/workspace/plm/')
 
         self.topic=MyIdenticator(args, training=False)
         self.topic.load_state_dict(torch.load(args.topic_model))
