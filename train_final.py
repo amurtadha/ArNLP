@@ -191,7 +191,7 @@ def main(opt):
         'dev': '/workspace/ArNLP/datasets/{0}/dev.json'.format(opt.dataset),
     }
     
-    input_colses =  ['input_ids', 'segments_ids', 'input_mask','input_ids_r', 'segments_ids_r', 'input_mask_r', 'label']
+    input_colses =  ['input_ids', 'segments_ids', 'input_mask', 'label']
 
     opt.dataset_file = dataset_files
     opt.inputs_cols = input_colses
