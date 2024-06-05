@@ -9,9 +9,10 @@ from sentence_transformers import SentenceTransformer
 class MyIdenticator(nn.Module):
     def __init__(self, opt, training=True):
         super(MyIdenticator, self).__init__()
-        config = AutoConfig.from_pretrained(opt.pretrained_bert_name,  cache_dir='/workspace/plm/')
+        config = AutoConfig.from_pretrained(opt.pretrained_bert_name, cache_dir='/workspace/plm/')
         self.config=config
-        dim =512
+        # dim =512
+        dim =config.hidden_size
         if training:
             self.encoder = SentenceTransformer(opt.pretrained_bert_name)
         else:
@@ -27,7 +28,7 @@ class MyIdenticator(nn.Module):
    
     def _get_r(self, text):
         with torch.no_grad():
-            outputs = self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False)
+            outputs = self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False, batch_size=64)
 
         outputs = normalize(outputs, p=2, dim=1)
         m_t = outputs
@@ -37,11 +38,11 @@ class MyIdenticator(nn.Module):
         return r_t
     def forward(self, text, training=True):
         with torch.no_grad():
-            outputs =  self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False)
+            outputs =  self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False, batch_size=64)
 
 
         outputs = normalize(outputs, p=2, dim=1)
-        m_t = outputs        
+        m_t = outputs
         v_t= softmax(self.dense(m_t), dim=-1)
         r_t = normalize(torch.matmul( v_t, self.T.weight), dim=-1)
         m_n = m_t[torch.randint(0, m_t.size(0), (m_t.shape[0], self.opt.negative_sampling))]
@@ -67,7 +68,7 @@ class MyIdenticator(nn.Module):
 class Pure_plm(nn.Module):
     def __init__(self, args, hidden_size=256):
         super(Pure_plm, self).__init__()
-        config = AutoConfig.from_pretrained(args.pretrained_bert_name,  cache_dir='/workspace/plm/')
+        config = AutoConfig.from_pretrained(args.pretrained_bert_name, cache_dir='/workspace/plm/')
 
         self.topic=MyIdenticator(args, training=False)
         self.topic.load_state_dict(torch.load(args.topic_model))
@@ -75,7 +76,8 @@ class Pure_plm(nn.Module):
         self.encoder = AutoModel.from_pretrained(
             args.pretrained_bert_name, config=config)
 
-        dim = 512
+        # dim = 512
+        dim =  self.topic.config.hidden_size
         self.classifier = nn.Linear(config.hidden_size +dim, args.lebel_dim)
     def forward(self, inputs, pred=False):
         input_ids, token_type_ids, attention_mask = inputs[:3]
