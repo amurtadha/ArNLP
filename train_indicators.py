@@ -136,7 +136,7 @@ def main():
     parser.add_argument('--negative_sampling', default=20, type=int)
     parser.add_argument('--warmup_proportion', default=0.01, type=float)
     parser.add_argument('--n_clusters', default=15, type=int)
-    parser.add_argument('--pretrained_bert_name', default='/workspace/plm/mabert', type=str)
+    parser.add_argument('--pretrained_bert_name', default='sbert', type=str)
     parser.add_argument('--max_seq_len', default=128, type=int) #
     parser.add_argument('--device', default='cuda' , type=str, help='e.g. cuda:0')
     parser.add_argument('--seed', default=42, type=int, help='set seed for reproducibility')
