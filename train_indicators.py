@@ -28,19 +28,8 @@ import pickle as pk
 class Instructor:
     def __init__(self, opt):
         self.opt = opt
-        cache = 'cache/topic_{}_{}.pk'.format(self.opt.dataset, self.opt.plm)
-        if os.path.exists(cache):
-            d = pk.load(open(cache, 'rb'))
-            self.trainset = d['train']
-        else:
-            tokenizer = AutoTokenizer.from_pretrained(opt.pretrained_bert_name, cache_dir='/workspace/plm/')
-            self.trainset = Process_topic(opt.data_file['train'], tokenizer, opt.max_seq_len, opt.dataset)
-
-            if not os.path.exists('cache'):
-                os.mkdir('cache')
-            d = {'train': self.trainset}
-            pk.dump(d, open(cache, 'wb'))
-
+        tokenizer = AutoTokenizer.from_pretrained(opt.pretrained_bert_name, cache_dir='/workspace/plm/')
+        self.trainset = Process_topic(opt.data_file['train'], tokenizer, opt.max_seq_len, opt.dataset)
         logging.info('training: {}, PLM: {}'.format(len(self.trainset), self.opt.plm))
         self.model = MyIdenticator(opt)
 
