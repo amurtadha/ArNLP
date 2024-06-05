@@ -13,9 +13,9 @@ class MyIdenticator(nn.Module):
         self.config=config
         dim =512
         if training:
-            self.encoder = SentenceTransformer(opt.pretrained_bert_name,  cache_dir='/workspace/plm/')
+            self.encoder = SentenceTransformer(opt.pretrained_bert_name)
         else:
-            self.encoder = SentenceTransformer(opt.baseline_plm,  cache_dir='/workspace/plm/')
+            self.encoder = SentenceTransformer(opt.baseline_plm)
         self.opt = opt
         self.n_clusters = self.opt.n_clusters
         self.training = training
