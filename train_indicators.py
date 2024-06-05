@@ -146,7 +146,7 @@ def main():
         torch.backends.cudnn.benchmark = False
 
     plm = {
-        'sbert': 'sbertv2/snapshots/03a0532331151aeb3e1d2e602ffad62bb212a38d/',
+        'sbert': 'sentence-transformers/distiluse-base-multilingual-cased-v2',
         'mpnet': 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
     }
 
