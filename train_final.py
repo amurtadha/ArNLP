@@ -237,7 +237,7 @@ if __name__ == '__main__':
             'mbert': 'google-bert/bert-base-multilingual-cased',
             'arbert': 'UBC-NLP/ARBERT',
             'mabert': 'UBC-NLP/MARBERT',
-            'sbert': 'nrazavi/sbert-v2',
+            'sbert': 'sentence-transformers/distiluse-base-multilingual-cased-v2',
         }
     opt.plm_base= opt.baseline_plm
     opt.plm= opt.pretrained_bert_name
