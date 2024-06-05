@@ -134,6 +134,8 @@ def main():
     parser.add_argument('--max_seq_len', default=128, type=int)  #
     parser.add_argument('--device', default='cuda', type=str, help='e.g. cuda:0')
     parser.add_argument('--seed', default=42, type=int, help='set seed for reproducibility')
+    parser.add_argument('--l2reg', default=0.01, type=float)
+
     opt = parser.parse_args()
 
     if opt.seed is not None:
