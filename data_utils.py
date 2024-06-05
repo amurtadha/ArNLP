@@ -47,9 +47,6 @@ class Process_Corpus_from_json(Dataset):
                 'input_ids': input_ids,
                 'segments_ids': segment_ids,
                 'input_mask': input_mask,
-                'input_ids_r': input_ids_r,
-                'segments_ids_r': segment_ids_r,
-                'input_mask_r': input_mask_r,
                 'label': labels[label]
             }
             all_data.append(data)
@@ -77,23 +74,8 @@ class Process_topic(Dataset):
         all_data=[]
         for line in data:
             if len(line.split())<3:continue
-            inputs = tokenizer.encode_plus(line.strip().lower(), None, add_special_tokens=True,
-                                           max_length=max_seq_len, truncation='only_first', padding='max_length',
-                                           return_token_type_ids=True)
-
-            input_ids = inputs['input_ids']
-            input_mask = inputs['attention_mask']
-            segment_ids = inputs["token_type_ids"]
-
-            assert len(input_ids) <= max_seq_len
-            input_ids = np.asarray(input_ids, dtype='int64')
-            input_mask = np.asarray(input_mask, dtype='int64')
-            segment_ids = np.asarray(segment_ids, dtype='int64')
 
             data = {
-                'input_ids': input_ids,
-                'segments_ids': segment_ids,
-                'input_mask': input_mask,
                 'text': line.strip(),
             }
             all_data.append(data)
