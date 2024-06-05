@@ -43,7 +43,7 @@ class Instructor:
             self.testset = d['test']
             self.valset = d['dev']
         else:
-            tokenizer = AutoTokenizer.from_pretrained(opt.pretrained_bert_name)
+            tokenizer = AutoTokenizer.from_pretrained(opt.pretrained_bert_name,  cache_dir='/workspace/plm/')
             tokenizer_base_plm = AutoTokenizer.from_pretrained(opt.baseline_plm)
 
             self.trainset = Process_Corpus_from_json(opt.dataset_file['train'], tokenizer,tokenizer_base_plm, opt.max_seq_len, opt.dataset)
