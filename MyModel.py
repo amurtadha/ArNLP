@@ -17,6 +17,7 @@ class MyIdenticator(nn.Module):
             self.encoder = SentenceTransformer(opt.pretrained_bert_name)
         else:
             self.encoder = SentenceTransformer(opt.baseline_plm)
+        self.encoder.to(opt.device)
         self.opt = opt
         self.n_clusters = self.opt.n_clusters
         self.training = training
@@ -28,7 +29,7 @@ class MyIdenticator(nn.Module):
    
     def _get_r(self, text):
         with torch.no_grad():
-            outputs = self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False, batch_size=64)
+            outputs = self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False, batch_size=32)
 
         outputs = normalize(outputs, p=2, dim=1)
         m_t = outputs
@@ -36,9 +37,9 @@ class MyIdenticator(nn.Module):
 
         r_t = normalize(torch.matmul(v_t, self.T.weight), dim=-1)
         return r_t
-    def forward(self, text, training=True):
+    def forward(self, text):
         with torch.no_grad():
-            outputs =  self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False, batch_size=64)
+            outputs =  self.encoder.encode(text, convert_to_tensor=True, show_progress_bar=False, batch_size=32)
 
 
         outputs = normalize(outputs, p=2, dim=1)
