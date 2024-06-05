@@ -154,7 +154,7 @@ def main():
 
 
      plm = {
-            'sbert': 'nrazavi/sbert-v2',
+            'sbert': 'sentence-transformers/distiluse-base-multilingual-cased-v2',
         }
   
     opt.plm= opt.pretrained_bert_name
