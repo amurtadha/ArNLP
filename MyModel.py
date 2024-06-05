@@ -17,7 +17,6 @@ class MyIdenticator(nn.Module):
             self.encoder = SentenceTransformer(opt.pretrained_bert_name)
         else:
             self.encoder = SentenceTransformer(opt.baseline_plm)
-        self.encoder.to(opt.device)
         self.opt = opt
         self.n_clusters = self.opt.n_clusters
         self.training = training
